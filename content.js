@@ -22,6 +22,10 @@
         const prTitle = getPRTitle();
         const updateButton = document.querySelector('.btn-group-update-merge');
         if (updateButton) {
+            if (updateButton.disabled) {
+                console.log(`PR "${prTitle}": Update branch button is currently disabled`);
+                return;
+            }
             updateButton.click();
             console.log(`PR "${prTitle}": Base branch updated`);
 
