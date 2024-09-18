@@ -6,6 +6,11 @@
         if (updateButton) {
             updateButton.click();
             console.log('Base branch updated');
+
+            // Refresh the page after a delay to allow the update to complete
+            setTimeout(() => {
+                location.reload(); // Refresh the page
+            }, 3000); // 3-second delay to ensure the update is applied
         } else {
             console.log('Update branch button not found');
         }
@@ -17,6 +22,12 @@
             if (!mergeButton.disabled) {
                 mergeButton.click();
                 console.log('PR merged via squash and merge');
+
+                // Refresh the page after a delay to allow the merge to complete
+                setTimeout(() => {
+                    location.reload(); // Refresh the page after merging the PR
+                    checkIfPRMerged(); // Check if PR is merged after the reload
+                }, 3000); // 3-second delay for merge action to complete
             } else {
                 console.log('Merge button is currently disabled');
             }
@@ -25,12 +36,23 @@
         }
     }
 
+    // Function to check if the PR is already merged by looking for the "Merged" status
+    function checkIfPRMerged() {
+        const mergedStatus = document.querySelector('.State--merged');
+        if (mergedStatus) {
+            console.log('PR is merged. Stopping auto-merge process.');
+            stopAutoMerge(); // Stop the auto-merge process
+        } else {
+            console.log('PR is not merged yet.');
+        }
+    }
+
     function startAutoMerge() {
         if (!autoMergeInterval) {
             autoMergeInterval = setInterval(() => {
                 updateBaseBranch();
                 mergePR();
-            }, 10000);
+            }, 10000); // Adjust the interval as needed
             console.log('Auto merge started');
         }
     }
