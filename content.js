@@ -24,7 +24,9 @@
 
     function mergePR() {
         const prTitle = getPRTitle();
-        const mergeButton = document.querySelector('.merge-box-button');
+        // More specific query selector to target only the "Squash and merge" button
+        const mergeButton = document.querySelector('.merge-box-button.btn-group-squash');
+
         if (mergeButton) {
             if (!mergeButton.disabled) {
                 mergeButton.click();
