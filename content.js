@@ -57,12 +57,28 @@
         }
     }
 
+    // Function to reload the page before performing any auto-merge actions
+    function reloadAndCheck() {
+        const prTitle = getPRTitle();
+        console.log(`PR "${prTitle}": Reloading page before auto-merge check`);
+
+        // Reload the page and then perform the update/merge check after the reload
+        setTimeout(() => {
+            location.reload(); // Refresh the page
+
+            // Perform update base branch and merge checks after the page reloads
+            setTimeout(() => {
+                updateBaseBranch();
+                mergePR();
+            }, 3000); // Delay to ensure the page reloads properly
+        }, 1000); // Delay to initiate the reload
+    }
+
     function startAutoMerge() {
         const prTitle = getPRTitle();
         if (!autoMergeInterval) {
             autoMergeInterval = setInterval(() => {
-                updateBaseBranch();
-                mergePR();
+                reloadAndCheck(); // Reload the page before each auto-merge check
             }, 10000); // Adjust the interval as needed
             console.log(`PR "${prTitle}": Auto merge started`);
         }
