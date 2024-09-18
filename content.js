@@ -29,7 +29,9 @@
             updateButton.click();
             console.log(`PR "${prTitle}": Base branch updated`);
 
-            location.reload(); // Refresh the page
+            setTimeout(() => {
+                location.reload(); // Refresh the page
+            }, 3000); // Delay to ensure the base branch is updated properly
         } else {
             console.log(`PR "${prTitle}": Update branch button not found`);
         }
@@ -45,7 +47,9 @@
                 mergeButton.click();
                 console.log(`PR "${prTitle}": PR merged via squash and merge`);
 
-                location.reload(); // Refresh the page
+                setTimeout(() => {
+                    location.reload(); // Refresh the page
+                }, 3000); // Delay to ensure the base branch is updated properly
             } else {
                 console.log(`PR "${prTitle}": Merge button is currently disabled`);
             }
