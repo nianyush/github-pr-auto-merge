@@ -53,10 +53,6 @@
                 }, 2000);
 
                 console.log(`PR "${prTitle}": PR merged via squash and merge`);
-
-                setTimeout(() => {
-                    location.reload(); // Refresh the page
-                }, 3000); // Delay to ensure the base branch is updated properly
             } else {
                 console.log(`PR "${prTitle}": Merge button is currently disabled`);
             }
