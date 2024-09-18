@@ -45,10 +45,12 @@
         if (mergeButton) {
             if (!mergeButton.disabled) {
                 mergeButton.click();
-                const confirmButton = document.querySelector('.js-merge-commit-button[value="squash"]');
-                if (confirmButton) {
-                    confirmButton.click();
-                }
+                setTimeout(() => {
+                    const confirmButton = document.querySelector('.js-merge-commit-button[value="squash"]');
+                    if (confirmButton) {
+                        confirmButton.click();
+                    }
+                }, 2000);
 
                 console.log(`PR "${prTitle}": PR merged via squash and merge`);
 
