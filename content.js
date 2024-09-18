@@ -6,6 +6,18 @@
         return document.title || 'Unknown PR'; // Return the title of the PR page, or 'Unknown PR' if it can't be found
     }
 
+    // Function to store the auto-merge state and reload flag for a specific action
+    function saveAutoMergeState(isRunning, reloadKey = '', hasReloaded = false) {
+        let data = { autoMergeRunning: isRunning };
+        if (reloadKey) {
+            data[reloadKey] = hasReloaded; // Save the reload state for the specific action
+        }
+        chrome.storage.local.set(data, () => {
+            const prTitle = getPRTitle();
+            console.log(`PR "${prTitle}": Auto-merge state saved with ${reloadKey}: ${hasReloaded}`);
+        });
+    }
+
     function updateBaseBranch() {
         const prTitle = getPRTitle();
         const updateButton = document.querySelector('.btn-group-update-merge');
@@ -13,10 +25,7 @@
             updateButton.click();
             console.log(`PR "${prTitle}": Base branch updated`);
 
-            // Refresh the page after a delay to allow the update to complete
-            setTimeout(() => {
-                location.reload(); // Refresh the page
-            }, 3000); // 3-second delay to ensure the update is applied
+            location.reload(); // Refresh the page
         } else {
             console.log(`PR "${prTitle}": Update branch button not found`);
         }
@@ -32,11 +41,7 @@
                 mergeButton.click();
                 console.log(`PR "${prTitle}": PR merged via squash and merge`);
 
-                // Refresh the page after a delay to allow the merge to complete
-                setTimeout(() => {
-                    location.reload(); // Refresh the page after merging the PR
-                    checkIfPRMerged(); // Check if PR is merged after the reload
-                }, 3000); // 3-second delay for merge action to complete
+                location.reload(); // Refresh the page
             } else {
                 console.log(`PR "${prTitle}": Merge button is currently disabled`);
             }
@@ -45,33 +50,16 @@
         }
     }
 
-    // Function to check if the PR is already merged by looking for the "Merged" status
-    function checkIfPRMerged() {
-        const prTitle = getPRTitle();
-        const mergedStatus = document.querySelector('.State--merged');
-        if (mergedStatus) {
-            console.log(`PR "${prTitle}": PR is merged. Stopping auto-merge process.`);
-            stopAutoMerge(); // Stop the auto-merge process
-        } else {
-            console.log(`PR "${prTitle}": PR is not merged yet.`);
-        }
-    }
-
     // Function to reload the page before performing any auto-merge actions
     function reloadAndCheck() {
         const prTitle = getPRTitle();
         console.log(`PR "${prTitle}": Reloading page before auto-merge check`);
 
-        // Reload the page and then perform the update/merge check after the reload
+        // Perform update base branch and merge checks after the page reloads
         setTimeout(() => {
-            location.reload(); // Refresh the page
-
-            // Perform update base branch and merge checks after the page reloads
-            setTimeout(() => {
-                updateBaseBranch();
-                mergePR();
-            }, 3000); // Delay to ensure the page reloads properly
-        }, 1000); // Delay to initiate the reload
+            updateBaseBranch();
+            mergePR();
+        }, 3000); // Delay to ensure the page reloads properly
     }
 
     function startAutoMerge() {
@@ -80,6 +68,7 @@
             autoMergeInterval = setInterval(() => {
                 reloadAndCheck(); // Reload the page before each auto-merge check
             }, 10000); // Adjust the interval as needed
+            saveAutoMergeState(true); // Save that auto-merge has started
             console.log(`PR "${prTitle}": Auto merge started`);
         }
     }
@@ -89,6 +78,7 @@
         if (autoMergeInterval) {
             clearInterval(autoMergeInterval);
             autoMergeInterval = null;
+            saveAutoMergeState(false); // Save that auto-merge has stopped
             console.log(`PR "${prTitle}": Auto merge stopped`);
         }
     }
@@ -102,6 +92,14 @@
         } else if (request.action === 'stop') {
             console.log(`PR "${prTitle}": Stopping auto-merge process`);
             stopAutoMerge();
+        }
+    });
+
+    // When the script is loaded (after a reload), check if auto-merge was running
+    chrome.storage.local.get('autoMergeRunning', (data) => {
+        if (data.autoMergeRunning) {
+            console.log(`PR "${getPRTitle()}": Resuming auto-merge process after reload`);
+            startAutoMerge(); // Resume auto-merge if it was running before the reload
         }
     });
 })();
